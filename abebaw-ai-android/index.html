@@ -157,6 +157,39 @@ function cancelTask() {
   document.getElementById("approve").checked = false;
   showStatus("Task cancelled. Waiting for your command...");
 }
+function listen() {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition is not supported. Please use Chrome.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    const command = event.results[0][0].transcript;
+    const box = document.querySelector("textarea, input[type='text']");
+    if (box) {
+      box.value = command;
+      box.dispatchEvent(new Event("input", {bubbles:true}));
+    }
+  };
+}
+
+function speakAnswer() {
+  const answer = document.querySelector("#answer, #response");
+  const message = answer
+    ? answer.innerText
+    : "Hello! I am ABEB AW AI. How can I help you?";
+
+  const speech = new SpeechSynthesisUtterance(message);
+  speechSynthesis.speak(speech);
+}
+
 </script>
 </body>
 </html>
