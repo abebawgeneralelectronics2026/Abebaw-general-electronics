@@ -262,5 +262,62 @@ nav a:hover {
     © 2026 Abebaw General Electronics. All rights reserved.
   </footer>
 
+<!-- ABEB AW AI CONNECTION -->
+<section id="ai-chat" style="background:#172033;color:white;padding:20px;border-radius:15px;margin:20px auto;max-width:600px;">
+  <h2 style="color:#d4af37;">ABEB AW AI — Talk to Me</h2>
+  <div id="ai-response" style="padding:12px;min-height:60px;background:#101522;border-radius:10px;margin-bottom:12px;">
+    Hello! I am ready to help you.
+  </div>
+  <textarea id="ai-message" placeholder="Write your task here..." style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;min-height:80px;"></textarea>
+  <button id="ai-send" style="background:#d4af37;color:black;padding:13px 25px;border:0;border-radius:8px;margin-top:12px;font-weight:bold;">
+    SEND TO ABEB AW AI
+  </button>
+</section>
+
+<script>
+const apiURL = "https://old-rain-2f82abeb-aw-ai-api.jacksonabebe98.workers.dev/";
+
+document.getElementById("ai-send").addEventListener("click", async function () {
+  const message = document.getElementById("ai-message").value.trim();
+  const output = document.getElementById("ai-response");
+
+  if (!message) {
+    output.textContent = "Please write a message first.";
+    return;
+  }
+
+  output.textContent = "ABEB AW AI is thinking...";
+  this.disabled = true;
+
+  try {
+    const response = await fetch(apiURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Connection failed.");
+    }
+
+    const answer = data.output_text ||
+      data.output?.flatMap(item => item.content || [])
+        .filter(item => item.type === "output_text")
+        .map(item => item.text).join("\n");
+
+    output.textContent = answer || "The AI returned no text response.";
+  } catch (error) {
+    output.textContent = "Error: " + error.message;
+  } finally {
+    this.disabled = false;
+  }
+});
+</script>
+<!-- END ABEB AW AI CONNECTION -->
+
 </body>
 </html>
