@@ -191,5 +191,68 @@ function speakAnswer() {
 }
 
 </script>
+<script>
+async function confirmTask() {
+  const task = document.getElementById("task").value.trim();
+
+  if (!task) {
+    showStatus("Please enter a task first.");
+    return;
+  }
+
+  if (!document.getElementById("approve").checked) {
+    showStatus("Please approve this task first.");
+    return;
+  }
+
+  const risky = /delete|erase|format|reset|remove|payment|send|share|permission|password|change settings/i.test(task);
+
+  if (risky && !confirm("Important action! Do you confirm a second time?")) {
+    showStatus("Task cancelled.");
+    return;
+  }
+
+  showStatus("ABEB AW AI is thinking...");
+
+  try {
+    const response = await fetch(
+      "https://abeb-aw-ai-brain.jacksonabebe98.workers.dev",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: task,
+          language: document.getElementById("language").value
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI connection failed.");
+    }
+
+    answer = data.reply;
+    showStatus(answer);
+
+  } catch (error) {
+    showStatus("Connection problem: " + error.message);
+  }
+}
+
+function speakAnswer() {
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(answer);
+  speech.lang = document.getElementById("language").value;
+
+  window.speechSynthesis.speak(speech);
+}
+</script>
 </body>
 </html>
+
+
