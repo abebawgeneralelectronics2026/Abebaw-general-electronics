@@ -3,6 +3,43 @@
 <head><meta name="google-site-verification" content="XYMN67B-oznwlwuN5E2p0NqFcbgwH8Nao9QjNoBOljo" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abebaw General Electronics | Electronics Repair & Maintenance</title>
+<meta name="description" content="Abebaw General Electronics provides professional phone, computer, TV and electronics repair, maintenance, and interior finishing services in Ethiopia.">  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #111;
+      padding: 25px 15px;
+      text-align: center;
+      border-bottom: 2px solid #d4af37;
+    }
+
+    header h1 {
+      color: #d4af37;
+      font-size: 30px;
+    }
+
+    header p {
+      color: #ddd;
+      margin-top: 8px;
+    }
+
+    <!DOCTYPE html>
+<html lang="en">
+<head><meta name="google-site-verification" content="XYMN67B-oznwlwuN5E2p0NqFcbgwH8Nao9QjNoBOljo" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Abebaw General Electronics | Electronics Repair & Maintenance</title
 <meta name="description" content="Abebaw General Electronics provides professional phone, computer, TV and electronics repair, maintenance, and interior finishing services in Ethiopia.">  <style>
     * {
@@ -262,40 +299,170 @@ nav a:hover {
     © 2026 Abebaw General Electronics. All rights reserved.
   </footer>
 
+
 <!-- ABEB AW AI CONNECTION -->
 <section id="ai-chat" style="background:#172033;color:white;padding:20px;border-radius:15px;margin:20px auto;max-width:600px;">
+
   <h2 style="color:#d4af37;">ABEB AW AI — Talk to Me</h2>
-  <div id="ai-response" style="padding:12px;min-height:60px;background:#101522;border-radius:10px;margin-bottom:12px;">
-    Hello! I am ready to help you.
+
+  <h3 style="color:#d4af37;">🌍 Conversation Language</h3>
+
+  <select id="ai-language" style="width:100%;padding:12px;margin:10px 0;border-radius:8px;">
+    <option value="auto">Automatic language detection</option>
+    <option value="en-US">English</option>
+    <option value="am-ET">Amharic</option>
+    <option value="om-ET">Afaan Oromo</option>
+    <option value="ar-SA">Arabic</option>
+    <option value="fr-FR">French</option>
+    <option value="sw-KE">Swahili</option>
+    <option value="hi-IN">Hindi</option>
+    <option value="es-ES">Spanish</option>
+    <option value="zh-CN">Chinese</option>
+  </select>
+
+  <div id="ai-response" style="padding:12px;min-height:60px;background:#101522;border-radius:10px;margin:12px 0;">
+    Hello! I am ABEB AW AI, created by Abebaw.
   </div>
-  <textarea id="ai-message" placeholder="Write your task here..." style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;min-height:80px;"></textarea>
-  <button id="ai-send" style="background:#d4af37;color:black;padding:13px 25px;border:0;border-radius:8px;margin-top:12px;font-weight:bold;">
-    SEND TO ABEB AW AI
-  </button>
+
+  <textarea id="ai-message"
+    placeholder="Write your message or speak..."
+    style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;min-height:90px;font-size:16px;">
+  </textarea>
+
+  <div style="text-align:center;margin-top:12px;">
+
+    <button id="ai-listen" style="background:#d4af37;color:black;padding:13px;border:0;border-radius:8px;font-weight:bold;">
+      🎤 SPEAK
+    </button>
+
+    <button id="ai-send" style="background:#d4af37;color:black;padding:13px;border:0;border-radius:8px;font-weight:bold;">
+      SEND MESSAGE
+    </button>
+
+  </div>
+
+  <p style="color:#bbb;font-size:13px;margin-top:12px;">
+    Speak in your selected language. Your recognized words will appear in the message box.
+  </p>
+
 </section>
 
 <script>
+
 const apiURL = "https://old-rain-2f82abeb-aw-ai-api.jacksonabebe98.workers.dev/";
 
-document.getElementById("ai-send").addEventListener("click", async function () {
-  const message = document.getElementById("ai-message").value.trim();
-  const output = document.getElementById("ai-response");
+const aiMessage = document.getElementById("ai-message");
+const aiResponse = document.getElementById("ai-response");
+const aiSend = document.getElementById("ai-send");
+const aiListen = document.getElementById("ai-listen");
+const aiLanguage = document.getElementById("ai-language");
 
-  if (!message) {
-    output.textContent = "Please write a message first.";
+let aiRecognition = null;
+let aiListening = false;
+
+// MICROPHONE INPUT
+
+aiListen.addEventListener("click", function() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    aiResponse.textContent =
+      "Speech recognition is unavailable. Please use Google Chrome.";
     return;
   }
 
-  output.textContent = "ABEB AW AI is thinking...";
-  this.disabled = true;
+  if (aiListening) {
+    aiRecognition.stop();
+    return;
+  }
+
+  aiRecognition = new SpeechRecognition();
+
+  const selectedLanguage = aiLanguage.value;
+
+  aiRecognition.lang =
+    selectedLanguage === "auto"
+      ? (navigator.language || "en-US")
+      : selectedLanguage;
+
+  aiRecognition.continuous = false;
+  aiRecognition.interimResults = true;
+  aiRecognition.maxAlternatives = 1;
+
+  aiRecognition.onstart = function() {
+    aiListening = true;
+    aiListen.textContent = "⏹ STOP";
+    aiResponse.textContent = "Listening... Speak now.";
+  };
+
+  aiRecognition.onresult = function(event) {
+
+    let spokenText = "";
+
+    for (let i = 0; i < event.results.length; i++) {
+      spokenText += event.results[i][0].transcript;
+    }
+
+    aiMessage.value = spokenText;
+
+    aiResponse.textContent = "I heard: " + spokenText;
+
+  };
+
+  aiRecognition.onerror = function(event) {
+
+    aiResponse.textContent =
+      "Microphone problem: " + event.error;
+
+  };
+
+  aiRecognition.onend = function() {
+
+    aiListening = false;
+    aiListen.textContent = "🎤 SPEAK";
+
+  };
 
   try {
+    aiRecognition.start();
+  } catch (error) {
+    aiResponse.textContent = error.message;
+  }
+
+});
+
+// SEND MESSAGE TO AI
+
+aiSend.addEventListener("click", async function() {
+
+  const message = aiMessage.value.trim();
+
+  if (!message) {
+    aiResponse.textContent = "Please write or speak a message first.";
+    return;
+  }
+
+  aiSend.disabled = true;
+  aiResponse.textContent = "ABEB AW AI is thinking...";
+
+  try {
+
     const response = await fetch(apiURL, {
+
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message: message })
+
+      body: JSON.stringify({
+        message: message,
+        language: aiLanguage.value
+      })
+
     });
 
     const data = await response.json();
@@ -304,21 +471,459 @@ document.getElementById("ai-send").addEventListener("click", async function () {
       throw new Error(data.error || "Connection failed.");
     }
 
-    const answer = data.output_text ||
+    const answer =
+      data.output_text ||
+      data.reply ||
+      data.response ||
       data.output?.flatMap(item => item.content || [])
         .filter(item => item.type === "output_text")
         .map(item => item.text).join("\n");
 
-    output.textContent = answer || "The AI returned no text response.";
+    aiResponse.textContent =
+      answer || "The AI returned no text response.";
+
   } catch (error) {
-    output.textContent = "Error: " + error.message;
+
+    aiResponse.textContent =
+      "Connection error: " + error.message;
+
   } finally {
-    this.disabled = false;
+
+    aiSend.disabled = false;
+
   }
+
 });
+
 </script>
 <!-- END ABEB AW AI CONNECTION -->
 </script>
+
+</body>
+</html>
+
+  color: #d4af37;
+  text-decoration: none;
+  margin: 0 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: white;
+}
+
+    .hero {
+  text-align: center;
+  padding: 90px 20px;
+  background: linear-gradient(135deg, #111, #242424);
+  border-bottom: 1px solid #d4af37;
+}
+
+.hero h2 {
+  color: #d4af37;
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  color: #ddd;
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
+}
+
+    .hero h2 {
+      color: #d4af37;
+      font-size: 36px;
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      color: #ddd;
+      max-width: 650px;
+      margin: auto;
+    }
+
+    
+
+    section {
+      padding: 50px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    section h2 {
+      text-align: center;
+      color: #d4af37;
+      margin-bottom: 30px;
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+  background: #1a1a1a;
+  border: 1px solid #d4af37;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+} {
+      background: #1d1d1d;
+      border: 1px solid #444;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .card h3 {
+      color: #d4af37;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      color: #ccc;
+    }
+.button {
+  display: inline-block;
+  background: #d4af37;
+  color: #111;
+  padding: 14px 24px;
+  margin: 20px 5px 5px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.button:hover {
+  background: #fff;
+  color: #111;
+  transform: translateY(-2px);
+}
+    .contact {
+      text-align: center;
+      background: #181818;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #0b0b0b;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+     <h1>ABEBAW GENERAL ELECTRONICS</h1>   <p>Electronics Repair & Maintenance</p>
+    <p>📱 Phones • 💻 Computers • 🔧 Electronics</p>
+
+    <nav>
+  <a href="#home">Home</a>
+  <a href="#services">Electronics</a>
+  <a href="#finishing">Finishing & Interior</a>
+  <a href="#contact">Contact</a>
+</nav>
+  </header>
+
+  <div class="hero" id="home">
+    <h2>Professional Electronics & Interior Solutions</h2>
+    <p>
+  Expert electronics repair, construction finishing and beautiful interior design.
+  Quality service you can trust.
+</p>
+
+    <a class="button" href="tel:0947419086">📞 Call Now</a>
+    <a class="button" href="https://wa.me/251947419086">💬 WhatsApp</a>
+  </div>
+
+  <section id="services">
+    <h2>Our Services</h2>
+
+    <div class="services">
+
+      <div class="card">
+        <h3>📱 Phone Repair</h3>
+        <p>Phone diagnosis, software service and general repair.</p>
+      </div>
+
+      <div class="card">
+        <h3>💻 Computer Repair</h3>
+        <p>Computer troubleshooting, maintenance and software service.</p>
+      </div>
+
+      <div class="card">
+        <h3>📺 TV Repair</h3>
+        <p>Diagnosis and repair of televisions and related electronics.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔧 Electronics Maintenance</h3>
+        <p>Professional maintenance and repair of electronic equipment.</p>
+      </div>
+
+    </div>
+  </section>
+  <section id="finishing">
+    <h2>🏠 Construction Finishing & Interior Design</h2>
+<p style="text-align:center; color:#ddd; max-width:700px; margin:0 auto 30px;">
+  Transform your home or business with beautiful finishing and modern interior design.
+  We provide quality workmanship, creative ideas and professional service.
+</p>
+    <div class="services">
+
+      <div class="card">
+        <h3>🎨 Painting & Wall Finishing</h3>
+        <p>Professional painting and beautiful wall finishing for homes and businesses.</p>
+      </div>
+
+      <div class="card">
+        <h3>🏠 Interior Design</h3>
+        <p>Modern and beautiful interior design to make your space comfortable and attractive.</p>
+      </div>
+
+      <div class="card">
+        <h3>✨ Interior Decoration</h3>
+        <p>Creative decoration and finishing ideas for a beautiful modern environment.</p>
+      </div>
+
+      <div class="card">
+        <h3>🛠️ General Finishing Work</h3>
+        <p>Quality construction finishing work with professional attention to detail.</p>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;">
+      <a class="button" href="tel:0947419086">📞 Call Now</a>
+      <a class="button" href="https://wa.me/251947419086">💬 WhatsApp Us</a>
+    </div>
+  </section>
+  <section id="contact" class="contact">
+    <h2>Contact Us</h2>
+
+    <p>📞 Phone: <a href="tel:0947419086">0947419086</a></p>
+    <p>📍 Location: Ethiopia</p>
+
+    <a class="button" href="tel:0947419086">📞 Call Us</a>
+    <a class="button" href="https://wa.me/251947419086">💬 WhatsApp Us</a>
+  </section>
+
+  <footer>
+    © 2026 Abebaw General Electronics. All rights reserved.
+  </footer>
+
+
+<!-- ABEB AW AI CONNECTION -->
+<section id="ai-chat" style="background:#172033;color:white;padding:20px;border-radius:15px;margin:20px auto;max-width:600px;">
+
+  <h2 style="color:#d4af37;">ABEB AW AI — Talk to Me</h2>
+
+  <h3 style="color:#d4af37;">🌍 Conversation Language</h3>
+
+  <select id="ai-language" style="width:100%;padding:12px;margin:10px 0;border-radius:8px;">
+    <option value="auto">Automatic language detection</option>
+    <option value="en-US">English</option>
+    <option value="am-ET">Amharic</option>
+    <option value="om-ET">Afaan Oromo</option>
+    <option value="ar-SA">Arabic</option>
+    <option value="fr-FR">French</option>
+    <option value="sw-KE">Swahili</option>
+    <option value="hi-IN">Hindi</option>
+    <option value="es-ES">Spanish</option>
+    <option value="zh-CN">Chinese</option>
+  </select>
+
+  <div id="ai-response" style="padding:12px;min-height:60px;background:#101522;border-radius:10px;margin:12px 0;">
+    Hello! I am ABEB AW AI, created by Abebaw.
+  </div>
+
+  <textarea id="ai-message"
+    placeholder="Write your message or speak..."
+    style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;min-height:90px;font-size:16px;">
+  </textarea>
+
+  <div style="text-align:center;margin-top:12px;">
+
+    <button id="ai-listen" style="background:#d4af37;color:black;padding:13px;border:0;border-radius:8px;font-weight:bold;">
+      🎤 SPEAK
+    </button>
+
+    <button id="ai-send" style="background:#d4af37;color:black;padding:13px;border:0;border-radius:8px;font-weight:bold;">
+      SEND MESSAGE
+    </button>
+
+  </div>
+
+  <p style="color:#bbb;font-size:13px;margin-top:12px;">
+    Speak in your selected language. Your recognized words will appear in the message box.
+  </p>
+
+</section>
+
+<script>
+
+const apiURL = "https://old-rain-2f82abeb-aw-ai-api.jacksonabebe98.workers.dev/";
+
+const aiMessage = document.getElementById("ai-message");
+const aiResponse = document.getElementById("ai-response");
+const aiSend = document.getElementById("ai-send");
+const aiListen = document.getElementById("ai-listen");
+const aiLanguage = document.getElementById("ai-language");
+
+let aiRecognition = null;
+let aiListening = false;
+
+// MICROPHONE INPUT
+
+aiListen.addEventListener("click", function() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    aiResponse.textContent =
+      "Speech recognition is unavailable. Please use Google Chrome.";
+    return;
+  }
+
+  if (aiListening) {
+    aiRecognition.stop();
+    return;
+  }
+
+  aiRecognition = new SpeechRecognition();
+
+  const selectedLanguage = aiLanguage.value;
+
+  aiRecognition.lang =
+    selectedLanguage === "auto"
+      ? (navigator.language || "en-US")
+      : selectedLanguage;
+
+  aiRecognition.continuous = false;
+  aiRecognition.interimResults = true;
+  aiRecognition.maxAlternatives = 1;
+
+  aiRecognition.onstart = function() {
+    aiListening = true;
+    aiListen.textContent = "⏹ STOP";
+    aiResponse.textContent = "Listening... Speak now.";
+  };
+
+  aiRecognition.onresult = function(event) {
+
+    let spokenText = "";
+
+    for (let i = 0; i < event.results.length; i++) {
+      spokenText += event.results[i][0].transcript;
+    }
+
+    aiMessage.value = spokenText;
+
+    aiResponse.textContent = "I heard: " + spokenText;
+
+  };
+
+  aiRecognition.onerror = function(event) {
+
+    aiResponse.textContent =
+      "Microphone problem: " + event.error;
+
+  };
+
+  aiRecognition.onend = function() {
+
+    aiListening = false;
+    aiListen.textContent = "🎤 SPEAK";
+
+  };
+
+  try {
+    aiRecognition.start();
+  } catch (error) {
+    aiResponse.textContent = error.message;
+  }
+
+});
+
+// SEND MESSAGE TO AI
+
+aiSend.addEventListener("click", async function() {
+
+  const message = aiMessage.value.trim();
+
+  if (!message) {
+    aiResponse.textContent = "Please write or speak a message first.";
+    return;
+  }
+
+  aiSend.disabled = true;
+  aiResponse.textContent = "ABEB AW AI is thinking...";
+
+  try {
+
+    const response = await fetch(apiURL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        message: message,
+        language: aiLanguage.value
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Connection failed.");
+    }
+
+    const answer =
+      data.output_text ||
+      data.reply ||
+      data.response ||
+      data.output?.flatMap(item => item.content || [])
+        .filter(item => item.type === "output_text")
+        .map(item => item.text).join("\n");
+
+    aiResponse.textContent =
+      answer || "The AI returned no text response.";
+
+  } catch (error) {
+
+    aiResponse.textContent =
+      "Connection error: " + error.message;
+
+  } finally {
+
+    aiSend.disabled = false;
+
+  }
+
+});
+
+</script>
+<!-- END ABEB AW AI CONNECTION -->
+
 
 </body>
 </html>
