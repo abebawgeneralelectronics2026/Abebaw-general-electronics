@@ -474,22 +474,26 @@ function listen() {
     showStatus("Listening... Speak now.");
   };
 
+recognition.onresult = function(event) {
+
   console.log("SPEECH RESULT:", event.results);
 
-    let spokenText = "";
+  let spokenText = "";
 
-    for (
-      let i = 0;
-      i < event.results.length;
-      i++
-    ) {
-      spokenText += event.results[i][0].transcript;
-    }
+  for (
+    let i = 0;
+    i < event.results.length;
+    i++
+  ) {
+    spokenText += event.results[i][0].transcript;
+  }
 
-    taskInput.value = spokenText;
+  taskInput.value = spokenText;
 
-    showStatus("Recognized: " + spokenText);
-  };
+  showStatus("Recognized: " + spokenText);
+
+};
+
 
   recognition.onerror = function(event) {
 
