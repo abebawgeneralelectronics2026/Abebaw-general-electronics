@@ -140,10 +140,11 @@
       border: none;
       cursor: pointer;
       transition: 0.3s;
+      font-size: 14px;
     }
 
     .button:hover {
-      background: #fff;
+      background: white;
       color: #111;
       transform: translateY(-2px);
     }
@@ -389,7 +390,7 @@
   </section>
 
 
-  <!-- ABEB AW AI CONNECTION -->
+  <!-- ABEB AW AI -->
 
   <section id="ai-chat">
 
@@ -400,32 +401,21 @@
     <select id="ai-language">
 
       <option value="auto">Automatic language detection</option>
-
       <option value="en-US">English</option>
-
       <option value="am-ET">Amharic</option>
-
       <option value="om-ET">Afaan Oromo</option>
-
       <option value="ar-SA">Arabic</option>
-
       <option value="fr-FR">French</option>
-
       <option value="sw-KE">Swahili</option>
-
       <option value="hi-IN">Hindi</option>
-
       <option value="es-ES">Spanish</option>
-
       <option value="zh-CN">Chinese</option>
 
     </select>
 
 
     <div id="ai-response">
-
       Hello! I am ABEB AW AI, created by Abebaw.
-
     </div>
 
 
@@ -453,6 +443,15 @@
         SEND MESSAGE
       </button>
 
+      <button
+        type="button"
+        class="button"
+        id="ai-speak"
+        disabled
+      >
+        🔊 SPEAK RESPONSE
+      </button>
+
     </div>
 
 
@@ -460,6 +459,8 @@
 
       Speak in your selected language. Your recognized words
       will appear in the message box.
+
+      Tap SPEAK RESPONSE whenever you want to hear the AI answer.
 
     </p>
 
@@ -475,34 +476,144 @@
   </footer>
 
 
-  <!-- JAVASCRIPT -->
+  <!-- ABEB AW AI JAVASCRIPT -->
 
   <script>
 
-    // ABEB AW AI API CONNECTION
+    // API CONNECTIONS
 
     const apiURL =
       "https://old-rain-2f82abeb-aw-ai-api.jacksonabebe98.workers.dev/";
 
+    const speakURL =
+      "https://abeb-aw-ai-brain.jacksonabebe98.workers.dev/speak";
+
 
     // HTML ELEMENTS
 
-    const aiMessage = document.getElementById("ai-message");
+    const aiMessage =
+      document.getElementById("ai-message");
 
-    const aiResponse = document.getElementById("ai-response");
+    const aiResponse =
+      document.getElementById("ai-response");
 
-    const aiSend = document.getElementById("ai-send");
+    const aiSend =
+      document.getElementById("ai-send");
 
-    const aiListen = document.getElementById("ai-listen");
+    const aiListen =
+      document.getElementById("ai-listen");
 
-    const aiLanguage = document.getElementById("ai-language");
+    const aiLanguage =
+      document.getElementById("ai-language");
+
+    const aiSpeak =
+      document.getElementById("ai-speak");
 
 
-    // MICROPHONE VARIABLES
+    // VARIABLES
 
     let aiRecognition = null;
 
     let aiListening = false;
+
+    let lastAIAnswer = "";
+
+    let currentAudio = null;
+
+    let currentAudioURL = null;
+
+
+    // STOP AUDIO
+
+    function stopAIAudio() {
+
+      if (currentAudio) {
+
+        currentAudio.pause();
+
+        currentAudio.currentTime = 0;
+
+        currentAudio = null;
+
+      }
+
+      if (currentAudioURL) {
+
+        URL.revokeObjectURL(currentAudioURL);
+
+        currentAudioURL = null;
+
+      }
+
+      aiSpeak.textContent = "🔊 SPEAK RESPONSE";
+
+      aiSpeak.disabled = !lastAIAnswer;
+
+    }
+
+
+    // CONVERT RAW PCM AUDIO TO WAV
+
+    function pcmToWav(pcmBytes, sampleRate) {
+
+      const headerSize = 44;
+
+      const wavBuffer = new ArrayBuffer(
+        headerSize + pcmBytes.length
+      );
+
+      const view = new DataView(wavBuffer);
+
+      function writeString(offset, value) {
+
+        for (let i = 0; i < value.length; i++) {
+
+          view.setUint8(offset + i, value.charCodeAt(i));
+
+        }
+
+      }
+
+      writeString(0, "RIFF");
+
+      view.setUint32(
+        4,
+        36 + pcmBytes.length,
+        true
+      );
+
+      writeString(8, "WAVE");
+
+      writeString(12, "fmt ");
+
+      view.setUint32(16, 16, true);
+
+      view.setUint16(20, 1, true);
+
+      view.setUint16(22, 1, true);
+
+      view.setUint32(24, sampleRate, true);
+
+      view.setUint32(28, sampleRate * 2, true);
+
+      view.setUint16(32, 2, true);
+
+      view.setUint16(34, 16, true);
+
+      writeString(36, "data");
+
+      view.setUint32(
+        40,
+        pcmBytes.length,
+        true
+      );
+
+      new Uint8Array(wavBuffer, headerSize)
+        .set(pcmBytes);
+
+      return wavBuffer;
+
+    }
 
 
     // MICROPHONE INPUT
@@ -538,9 +649,6 @@
 
       const selectedLanguage = aiLanguage.value;
 
-
-      // Browser speech recognition uses a selected language.
-      // Automatic mode uses the device language for microphone input.
 
       aiRecognition.lang =
         selectedLanguage === "auto"
@@ -635,6 +743,12 @@
       }
 
 
+      stopAIAudio();
+
+      lastAIAnswer = "";
+
+      aiSpeak.disabled = true;
+
       aiSend.disabled = true;
 
       aiResponse.textContent = "ABEB AW AI is thinking...";
@@ -647,9 +761,7 @@
           method: "POST",
 
           headers: {
-
             "Content-Type": "application/json"
-
           },
 
           body: JSON.stringify({
@@ -675,8 +787,6 @@
         }
 
 
-        // READ AI RESPONSE
-
         const answer =
 
           data.output_text ||
@@ -694,9 +804,17 @@
             .join("\n");
 
 
+        lastAIAnswer = answer || "";
+
         aiResponse.textContent =
 
-          answer || "The AI returned no text response.";
+          lastAIAnswer ||
+          "The AI returned no text response.";
+
+
+        aiSpeak.disabled = !lastAIAnswer;
+
+        aiSpeak.textContent = "🔊 SPEAK RESPONSE";
 
 
       } catch (error) {
@@ -707,6 +825,170 @@
       } finally {
 
         aiSend.disabled = false;
+
+      }
+
+    });
+
+
+
+    // SPEAK AI RESPONSE WHEN USER TAPS BUTTON
+
+    aiSpeak.addEventListener("click", async function() {
+
+      // STOP CURRENT AUDIO IF IT IS PLAYING
+
+      if (currentAudio && !currentAudio.paused) {
+
+        stopAIAudio();
+
+        return;
+
+      }
+
+
+      if (!lastAIAnswer) {
+
+        return;
+
+      }
+
+
+      aiSpeak.disabled = true;
+
+      aiSpeak.textContent = "🔊 GENERATING VOICE...";
+
+
+      try {
+
+        const response = await fetch(speakURL, {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type": "application/json"
+
+          },
+
+          body: JSON.stringify({
+
+            text: lastAIAnswer
+
+          })
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.error || "Voice generation failed."
+          );
+
+        }
+
+
+        if (!data.audio) {
+
+          throw new Error("No audio received from ABEB AW AI.");
+
+        }
+
+
+        // DECODE BASE64 AUDIO
+
+        const binary = atob(data.audio);
+
+        const bytes = new Uint8Array(binary.length);
+
+        for (let i = 0; i < binary.length; i++) {
+
+          bytes[i] = binary.charCodeAt(i);
+
+        }
+
+
+        const mimeType = data.mimeType || "audio/wav";
+
+        let audioBlob;
+
+
+        // HANDLE RAW PCM AUDIO
+
+        if (/audio\/l16|audio\/pcm/i.test(mimeType)) {
+
+          const rateMatch = mimeType.match(/rate=(\d+)/i);
+
+          const sampleRate = rateMatch
+            ? Number(rateMatch[1])
+            : 24000;
+
+          const wavBuffer = pcmToWav(
+            bytes,
+            sampleRate
+          );
+
+          audioBlob = new Blob(
+            [wavBuffer],
+            { type: "audio/wav" }
+          );
+
+        } else {
+
+          // HANDLE WAV OR OTHER AUDIO FORMATS
+
+          audioBlob = new Blob(
+            [bytes],
+            { type: mimeType }
+          );
+
+        }
+
+
+        currentAudioURL =
+          URL.createObjectURL(audioBlob);
+
+
+        currentAudio = new Audio(currentAudioURL);
+
+
+        currentAudio.onended = function() {
+
+          stopAIAudio();
+
+        };
+
+
+        currentAudio.onerror = function() {
+
+          stopAIAudio();
+
+          aiResponse.textContent +=
+            " Audio playback failed. Please try again.";
+
+        };
+
+
+        await currentAudio.play();
+
+
+        aiSpeak.textContent = "⏹ STOP SPEAKING";
+
+        aiSpeak.disabled = false;
+
+
+      } catch (error) {
+
+        aiSpeak.textContent = "🔊 SPEAK RESPONSE";
+
+        aiSpeak.disabled = false;
+
+        aiResponse.textContent =
+          "Voice error: " + error.message;
 
       }
 
