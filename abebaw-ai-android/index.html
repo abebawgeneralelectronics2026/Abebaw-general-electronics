@@ -426,9 +426,13 @@ async function speakAnswer() {
 }
 
 
+
 // ===================================
 // MICROPHONE INPUT
 // ===================================
+
+let recognition = null;
+let isListening = false;
 
 function listen() {
 
@@ -437,44 +441,54 @@ function listen() {
     window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
-
     showStatus(
-      "Voice recognition is unavailable. Please use Chrome.",
+      "Voice recognition is unavailable. Please open ABEB AW AI in Google Chrome.",
       true
     );
-
     return;
-
   }
 
-  const recognition = new SpeechRecognition();
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+
+  recognition = new SpeechRecognition();
 
   const selectedLanguage = languageSelect.value;
 
+  // Browser speech recognition needs a specific language.
+  // Automatic detection is not supported directly here.
   recognition.lang =
     selectedLanguage === "auto"
-      ? "en-US"
+      ? navigator.language || "en-US"
       : selectedLanguage;
 
-  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
 
   recognition.onstart = function() {
-
-    showStatus("Listening... Please speak.");
-
-    listenBtn.disabled = true;
-
+    isListening = true;
+    listenBtn.textContent = "⏹ STOP";
+    showStatus("Listening... Speak now.");
   };
 
   recognition.onresult = function(event) {
 
-    const spokenText =
-      event.results[0][0].transcript;
+    let spokenText = "";
+
+    for (
+      let i = 0;
+      i < event.results.length;
+      i++
+    ) {
+      spokenText += event.results[i][0].transcript;
+    }
 
     taskInput.value = spokenText;
 
-    showStatus("I heard: " + spokenText);
-
+    showStatus("Recognized: " + spokenText);
   };
 
   recognition.onerror = function(event) {
@@ -488,15 +502,20 @@ function listen() {
 
   recognition.onend = function() {
 
-    listenBtn.disabled = false;
+    isListening = false;
+    listenBtn.textContent = "🎤 SPEAK";
 
   };
 
-  recognition.start();
+  try {
+    recognition.start();
+  } catch (error) {
+    isListening = false;
+    listenBtn.textContent = "🎤 SPEAK";
+    showStatus("Could not start microphone: " + error.message, true);
+  }
 
 }
-
-
 // ===================================
 // APPROVED TASK SUBMISSION
 // ===================================
