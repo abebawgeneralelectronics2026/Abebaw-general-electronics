@@ -1,0 +1,189 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: white;
+  line-height: 1.6;
+}
+
+header {
+  background: #111;
+  padding: 25px 15px;
+  text-align: center;
+  border-bottom: 2px solid #d4af37;
+}
+
+header h1 {
+  color: #d4af37;
+  font-size: 30px;
+}
+
+header p {
+  color: #ddd;
+  margin-top: 8px;
+}
+
+nav {
+  margin-top: 18px;
+}
+
+nav a {
+  color: #d4af37;
+  text-decoration: none;
+  margin: 0 8px;
+  font-weight: bold;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 90px 20px;
+  background: linear-gradient(135deg, #111, #242424);
+  border-bottom: 1px solid #d4af37;
+}
+
+.hero h2 {
+  color: #d4af37;
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  color: #ddd;
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
+}
+
+section {
+  padding: 50px 20px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+section h2 {
+  text-align: center;
+  color: #d4af37;
+  margin-bottom: 30px;
+}
+
+.services {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  );
+  gap: 20px;
+}
+
+.card {
+  background: #1a1a1a;
+  border: 1px solid #d4af37;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+}
+
+.card h3 {
+  color: #d4af37;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #ccc;
+}
+
+.button {
+  display: inline-block;
+  background: #d4af37;
+  color: #111;
+  padding: 14px 24px;
+  margin: 20px 5px 5px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+.button:hover {
+  background: white;
+  color: #111;
+  transform: translateY(-2px);
+}
+
+.section-description {
+  text-align: center;
+  color: #ddd;
+  max-width: 700px;
+  margin: 0 auto 30px;
+}
+
+.center {
+  text-align: center;
+}
+
+.contact {
+  text-align: center;
+  background: #181818;
+}
+
+.contact a:not(.button) {
+  color: #d4af37;
+  text-decoration: none;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  background: #0b0b0b;
+  color: #aaa;
+}
+
+@media (max-width: 600px) {
+
+  header h1 {
+    font-size: 24px;
+  }
+
+  nav a {
+    margin: 6px;
+    font-size: 14px;
+  }
+
+  .hero {
+    padding: 60px 15px;
+  }
+
+  .hero h2 {
+    font-size: 30px;
+  }
+
+  section {
+    padding: 35px 15px;
+  }
+
+}
